@@ -1,0 +1,24 @@
+{
+  "name": "client",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron src/main.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/modstaller/client.git"
+  },
+  "bugs": {
+    "url": "https://github.com/modstaller/client/issues"
+  },
+  "homepage": "https://github.com/modstaller/client#readme",
+  "devDependencies": {
+    "electron": "^9.0.0-beta.10"
+  },
+  "dependencies": {
+    "fs-extra": "^9.0.0",
+    "got": "^10.7.0"
+  }
+}
