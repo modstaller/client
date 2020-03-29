@@ -5,6 +5,7 @@ const { spawn } = require('child_process');
 
 const fs = require('fs-extra');
 
+const { Assets } = require('./assets');
 const { Libraries } = require('./libraries');
 const { downloadFile, isAllowedByRules, osName } = require('./utils');
 
@@ -15,11 +16,17 @@ class Game {
     this.gameData = gameData;
     this.authData = authData;
     this.libraries = new Libraries(gameData.libraries);
+    this.assets = new Assets();
   }
 
   async install() {
     await this.libraries.install(join(this.folder, 'libraries'));
     await this.downloadClient();
+    await this.assets.install(
+      join(this.folder, 'assets'),
+      this.gameData.assetIndex.url,
+      this.gameData.assetIndex.id,
+    );
   }
 
   async downloadClient() {

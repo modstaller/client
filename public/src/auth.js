@@ -1,22 +1,15 @@
 'use strict';
 
-const { ipcMain } = require('electron');
-const got = require('got');
 const uuid = require('@lukeed/uuid');
 const jwt = require('jsonwebtoken');
 
-const { readAppJson, saveAppJson } = require('./utils');
+const { readAppJson, saveAppJson, gotBase } = require('./utils');
 
 const authServer = 'https://authserver.mojang.com';
 const authJsonFile = 'auth.json';
 
-const authGot = got.extend({
+const authGot = gotBase.extend({
   prefixUrl: authServer,
-  responseType: 'json',
-  headers: {
-    'content-type': 'application/json',
-    'user-agent': 'Modstaller',
-  },
   throwHttpErrors: false,
 });
 

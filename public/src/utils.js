@@ -23,6 +23,14 @@ if (platform === 'win32') {
 
 const arch = os.arch() === 'x64' ? 'x64' : 'x32';
 
+const gotBase = got.extend({
+  responseType: 'json',
+  headers: {
+    'content-type': 'application/json',
+    'user-agent': 'Modstaller',
+  },
+});
+
 function getAppPath(name) {
   return path.join(app.getPath('userData'), 'App', name);
 }
@@ -110,4 +118,5 @@ module.exports = {
   osName,
   arch,
   downloadFile,
+  gotBase,
 };

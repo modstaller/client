@@ -1,9 +1,7 @@
 'use strict';
 
-const got = require('got');
-
 const { Game } = require('./game');
-const { getAppPath } = require('./utils');
+const { getAppPath, gotBase } = require('./utils');
 
 class GameManager {
   constructor() {
@@ -60,27 +58,14 @@ class GameManager {
 }
 
 async function getVersionManifest() {
-  const response = await got.get(
+  const response = await gotBase.get(
     'https://launchermeta.mojang.com/mc/game/version_manifest.json',
-    {
-      responseType: 'json',
-      headers: {
-        'content-type': 'application/json',
-        'user-agent': 'Modstaller',
-      },
-    },
   );
   return response.body;
 }
 
 async function getMetadata(url) {
-  const response = await got.get(url, {
-    responseType: 'json',
-    headers: {
-      'content-type': 'application/json',
-      'user-agent': 'Modstaller',
-    },
-  });
+  const response = await gotBase.get(url);
   return response.body;
 }
 
