@@ -16,6 +16,7 @@ const authReducer = produce((draft, action) => {
   switch (action.type) {
     case 'AUTH_STATE': {
       draft.isLoggedIn = action.payload.isLoggedIn;
+      draft.user = action.payload.user;
       return;
     }
     case 'LOGIN_START': {

@@ -3,6 +3,7 @@
 const { ipcMain } = require('electron');
 const got = require('got');
 const uuid = require('@lukeed/uuid');
+const jwt = require('jsonwebtoken');
 
 const { readAppJson, saveAppJson } = require('./utils');
 
@@ -16,12 +17,11 @@ const authGot = got.extend({
     'content-type': 'application/json',
     'user-agent': 'Modstaller',
   },
+  throwHttpErrors: false,
 });
 
 class Auth {
   constructor() {
-    this.isLoggedIn = false;
-    this.clientToken = null;
     this.data = null;
     this.initPromise = null;
 
@@ -40,17 +40,19 @@ class Auth {
   handleMessage(event, message) {
     switch (message.type) {
       case 'READY': {
-        if (this.isLoggedIn) {
-          event.reply('auth', {
-            type: 'AUTH_STATE',
-            payload: { isLoggedIn: true },
-          });
-        } else {
-          event.reply('auth', {
-            type: 'AUTH_STATE',
-            payload: { isLoggedIn: false },
-          });
-        }
+        this.initPromise.then(() => {
+          if (this.data.accessToken) {
+            event.reply('auth', {
+              type: 'AUTH_STATE',
+              payload: { isLoggedIn: true, user: this.data.user },
+            });
+          } else {
+            event.reply('auth', {
+              type: 'AUTH_STATE',
+              payload: { isLoggedIn: false, user: null },
+            });
+          }
+        });
         return;
       }
       case 'DO_LOGIN': {
@@ -74,21 +76,24 @@ class Auth {
   }
 
   async readData() {
-    let authData = await readAppJson(authJsonFile);
+    const authData = await readAppJson(authJsonFile);
     if (authData === null) {
-      const clientToken = uuid();
-      this.clientToken = clientToken;
-      authData = { clientToken };
-      this.data = authData;
-      await saveAppJson(authJsonFile, authData);
+      this.data = { clientToken: uuid() };
+      await this.saveData();
     } else {
       this.data = authData;
     }
   }
 
+  async saveData() {
+    await saveAppJson(authJsonFile, this.data);
+  }
+
   async checkLogin() {
     // There's nothing to check, the user was never logged in.
     if (!this.data.accessToken) return;
+
+    await this.validate();
   }
 
   async login({ username, password }) {
@@ -98,18 +103,61 @@ class Auth {
           name: 'Minecraft',
           version: 1,
         },
+        clientToken: this.data.clientToken,
         username,
         password,
-        clientToken: this.clientToken,
-        requestUser: true,
       },
-      throwHttpErrors: false,
     });
 
     if (response.statusCode === 200) {
       this.data.user = response.body.selectedProfile;
+      this.data.accessToken = jwt.decode(response.body.accessToken);
+      await this.saveData();
     } else {
       throw new Error(response.body.errorMessage);
+    }
+  }
+
+  async refresh() {
+    if (!this.data.accessToken) {
+      throw new Error('accessToken is missing');
+    }
+
+    const response = await authGot.post('refresh', {
+      json: {
+        accessToken: this.data.accessToken.yggt,
+        clientToken: this.data.clientToken,
+        selectedProfile: {
+          id: this.data.user.id,
+          name: this.data.user.name,
+        },
+      },
+    });
+
+    if (response.statusCode === 200) {
+      this.data.user = response.body.selectedProfile;
+      this.data.accessToken = jwt.decode(response.body.accessToken);
+    } else {
+      delete this.data.user;
+      delete this.data.accessToken;
+    }
+    await this.saveData();
+  }
+
+  async validate() {
+    if (!this.data.accessToken) {
+      throw new Error('accessToken is missing');
+    }
+
+    const response = await authGot.post('validate', {
+      json: {
+        accessToken: this.data.accessToken.yggt,
+        clientToken: this.data.clientToken,
+      },
+    });
+
+    if (response.statusCode !== 204) {
+      await this.refresh();
     }
   }
 }
