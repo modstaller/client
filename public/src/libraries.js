@@ -1,15 +1,10 @@
 'use strict';
 
-const { pipeline } = require('stream');
-const { join, dirname } = require('path');
-const { promisify } = require('util');
+const { join } = require('path');
 
 const fs = require('fs-extra');
-const got = require('got');
 
-const { isAllowedByRules, osName, arch } = require('./utils');
-
-const pipelinePromise = promisify(pipeline);
+const { isAllowedByRules, osName, arch, downloadFile } = require('./utils');
 
 class Libraries {
   constructor(list) {
@@ -54,8 +49,7 @@ class Libraries {
         continue;
       }
 
-      await fs.ensureDir(dirname(destPath));
-      await pipelinePromise(got.stream(url), fs.createWriteStream(destPath));
+      await downloadFile(url, destPath);
     }
   }
 }

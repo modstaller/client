@@ -2,9 +2,14 @@
 
 const os = require('os');
 const path = require('path');
+const { pipeline } = require('stream');
+const { promisify } = require('util');
 
 const { app } = require('electron');
-const { readJson, outputJson } = require('fs-extra');
+const fs = require('fs-extra');
+const got = require('got');
+
+const pipelinePromise = promisify(pipeline);
 
 let osName = '';
 const platform = os.platform();
@@ -24,14 +29,14 @@ function getAppJsonPath(name) {
 
 async function readAppJson(name) {
   try {
-    return await readJson(getAppJsonPath(name));
+    return await fs.readJson(getAppJsonPath(name));
   } catch (e) {
     return null;
   }
 }
 
 async function saveAppJson(name, value) {
-  await outputJson(getAppJsonPath(name), value);
+  await fs.outputJson(getAppJsonPath(name), value);
 }
 
 function isAllowedByRules(element) {
@@ -92,4 +97,16 @@ function isAllowedByRules(element) {
   return defaultAllow;
 }
 
-module.exports = { readAppJson, saveAppJson, isAllowedByRules, osName, arch };
+async function downloadFile(url, destPath) {
+  await fs.ensureDir(path.dirname(destPath));
+  await pipelinePromise(got.stream(url), fs.createWriteStream(destPath));
+}
+
+module.exports = {
+  readAppJson,
+  saveAppJson,
+  isAllowedByRules,
+  osName,
+  arch,
+  downloadFile,
+};
