@@ -7,7 +7,7 @@ const { promisify } = require('util');
 const fs = require('fs-extra');
 const got = require('got');
 
-const { isAllowedByRules, osName } = require('./utils');
+const { isAllowedByRules, osName, arch } = require('./utils');
 
 const pipelinePromise = promisify(pipeline);
 
@@ -25,12 +25,15 @@ class Libraries {
 
       let artifact;
       if (library.natives) {
-        const nativesString = library.natives[osName];
+        let nativesString = library.natives[osName];
         if (!nativesString) {
           console.error(
             `skipping ${library.name} (no natives for os ${osName})`,
           );
           continue;
+        }
+        if (nativesString.includes('${arch}')) {
+          nativesString = nativesString.replace('${arch}', arch.slice(1));
         }
         artifact = library.downloads.classifiers[nativesString];
         if (!artifact) {
