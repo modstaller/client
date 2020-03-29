@@ -1,20 +1,21 @@
 const { app, BrowserWindow } = require('electron');
+const isDev = require('electron-is-dev');
 
 function createWindow() {
-  // Create the browser window.
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1200,
+    height: 800,
     webPreferences: {
       nodeIntegration: true,
     },
   });
 
-  // and load the index.html of the app.
-  win.loadFile('index.html');
-
-  // Open the DevTools.
-  win.webContents.openDevTools();
+  if (isDev) {
+    win.loadURL('http://localhost:3000');
+    win.webContents.openDevTools();
+  } else {
+    win.loadFile('../build/index.html');
+  }
 }
 
 // This method will be called when Electron has finished
