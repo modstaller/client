@@ -24,8 +24,6 @@ class Auth {
   constructor() {
     this.data = null;
     this.initPromise = null;
-
-    ipcMain.on('auth', (event, message) => this.handleMessage(event, message));
   }
 
   init() {
@@ -111,6 +109,7 @@ class Auth {
 
     if (response.statusCode === 200) {
       this.data.user = response.body.selectedProfile;
+      this.data.accessTokenRaw = response.body.accessToken;
       this.data.accessToken = jwt.decode(response.body.accessToken);
       await this.saveData();
     } else {
@@ -136,6 +135,7 @@ class Auth {
 
     if (response.statusCode === 200) {
       this.data.user = response.body.selectedProfile;
+      this.data.accessTokenRaw = response.body.accessToken;
       this.data.accessToken = jwt.decode(response.body.accessToken);
     } else {
       delete this.data.user;
@@ -162,11 +162,6 @@ class Auth {
   }
 }
 
-function init(webContents) {
-  const auth = new Auth(webContents);
-  auth.init();
-}
-
 module.exports = {
-  init,
+  Auth,
 };

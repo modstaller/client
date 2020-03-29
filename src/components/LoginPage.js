@@ -17,7 +17,7 @@ export default function LoginPage() {
   function handleSubmit(data) {
     setUsername(data.username);
     dispatch({ type: 'LOGIN_START' });
-    ipcRenderer.send('auth', { type: 'DO_LOGIN', payload: data });
+    ipcRenderer.send('message', 'auth', { type: 'DO_LOGIN', payload: data });
   }
 
   return (

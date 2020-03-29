@@ -3,7 +3,6 @@ import { useEffect } from 'react';
 
 export function useIpcDispatch(channel, dispatch) {
   useEffect(() => {
-    ipcRenderer.send('auth', { type: 'READY' });
     const listener = (_, action) => {
       dispatch(action);
     };

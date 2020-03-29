@@ -23,20 +23,20 @@ if (platform === 'win32') {
 
 const arch = os.arch() === 'x64' ? 'x64' : 'x32';
 
-function getAppJsonPath(name) {
+function getAppPath(name) {
   return path.join(app.getPath('userData'), 'App', name);
 }
 
 async function readAppJson(name) {
   try {
-    return await fs.readJson(getAppJsonPath(name));
+    return await fs.readJson(getAppPath(name));
   } catch (e) {
     return null;
   }
 }
 
 async function saveAppJson(name, value) {
-  await fs.outputJson(getAppJsonPath(name), value);
+  await fs.outputJson(getAppPath(name), value);
 }
 
 function isAllowedByRules(element) {
@@ -103,6 +103,7 @@ async function downloadFile(url, destPath) {
 }
 
 module.exports = {
+  getAppPath,
   readAppJson,
   saveAppJson,
   isAllowedByRules,

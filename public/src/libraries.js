@@ -9,6 +9,11 @@ const { isAllowedByRules, osName, arch, downloadFile } = require('./utils');
 class Libraries {
   constructor(list) {
     this.libraries = list;
+    this.classPath = [];
+  }
+
+  getClassPath() {
+    return this.classPath.join(';');
   }
 
   async install(destination) {
@@ -44,6 +49,7 @@ class Libraries {
       const { path, url } = artifact;
 
       const destPath = join(destination, path);
+      this.classPath.push(destPath);
       if (await fs.exists(destPath)) {
         console.error(`skipping ${library.name} (already downloaded)`);
         continue;
