@@ -1,0 +1,3 @@
+appId: com.modstaller
+productName: Modstaller
+extends: react-cra

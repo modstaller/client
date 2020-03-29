@@ -2,10 +2,11 @@
   "name": "modstaller-client",
   "productName": "Modstaller",
   "version": "0.0.0",
-  "main": "src/main.js",
+  "main": "public/electron.js",
   "private": true,
   "scripts": {
     "build-css": "tailwindcss build styles/styles.css -o public/styles.css",
+    "build-electron": "electron-builder build -w",
     "build-react": "rescripts build",
     "dev": "concurrently \"npm run start-react\" \"wait-on http://localhost:3000 && npm run start-electron\"",
     "prepare": "npm run build-css",
